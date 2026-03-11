@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "TreatApplication",
+            "request": "launch",
+            "mainClass": "com.tasty.treat.TreatApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-TreatApplication<treat>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tasty.treat.TreatApplication",
+            "projectName": "treat",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
