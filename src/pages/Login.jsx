@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authStore.js";
+import { cartActions } from "../store/shopping-cart/cartSlice.js";
 
 const API_URL = "http://localhost:5050/users/login";
 
@@ -63,7 +64,35 @@ const Login = () => {
         dispatch(authActions.setUser({
           username: data.username,
           email: payload.email,
+          userId: data.userId, // Added userId
         }));
+
+        // Fetch user's cart from backend
+        try {
+          const cartRes = await fetch(`http://localhost:5050/cart/${data.userId}`);
+          if (cartRes.ok) {
+            const cartData = await cartRes.json();
+            // Transform to Redux format
+            const cartItems = cartData.items.map(item => ({
+              id: item.productId,
+              title: item.title,
+              image01: item.image01,
+              price: item.price,
+              quantity: item.quantity,
+              totalPrice: item.totalPrice
+            }));
+            const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+            const totalAmount = cartItems.reduce((acc, item) => acc + item.totalPrice, 0);
+
+            dispatch(cartActions.replaceCart({
+              cartItems: cartItems,
+              totalQuantity: totalQuantity,
+              totalAmount: totalAmount
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to load cart", err);
+        }
 
         toast.success("Welcome back! Login successful 🎉");
         loginEmailRef.current.value = "";

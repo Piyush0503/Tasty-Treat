@@ -118,6 +118,19 @@ const cartSlice = createSlice({
         state.totalQuantity
       );
     },
+
+    //============ replace cart state ===========
+    replaceCart(state, action) {
+      state.cartItems = action.payload.cartItems || [];
+      state.totalQuantity = action.payload.totalQuantity || 0;
+      state.totalAmount = action.payload.totalAmount || 0;
+      
+      setItemFunc(
+        state.cartItems,
+        state.totalAmount,
+        state.totalQuantity
+      );
+    },
   },
 });
 

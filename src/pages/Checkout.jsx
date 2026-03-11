@@ -1,8 +1,12 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Container, Row, Col } from "reactstrap";
 import CommonSection from "../components/UI/common-section/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
+import { useNavigate } from "react-router-dom";
+import { cartActions } from "../store/shopping-cart/cartSlice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import "../styles/checkout.css";
 
@@ -14,14 +18,22 @@ const Checkout = () => {
   const [enterCity, setEnterCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
 
-  const shippingInfo = [];
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.cartItems);
   const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
+  const user = useSelector((state) => state.auth.user);
   const shippingCost = 30;
 
   const totalAmount = cartTotalAmount + Number(shippingCost);
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (!user || !user.userId) {
+      toast.error("You must be logged in to checkout.");
+      return;
+    }
+
     const userShippingAddress = {
       name: enterName,
       email: enterEmail,
@@ -29,15 +41,48 @@ const Checkout = () => {
       country: enterCountry,
       city: enterCity,
       postalCode: postalCode,
+      totalAmount: totalAmount,
+      items: cartItems.map(item => ({
+        productId: item.id,
+        title: item.title,
+        image01: item.image01,
+        price: item.price,
+        quantity: item.quantity,
+        totalPrice: item.totalPrice
+      }))
     };
 
-    shippingInfo.push(userShippingAddress);
-    console.log(shippingInfo);
+    try {
+      const res = await fetch(`http://localhost:5050/order/${user.userId}/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(userShippingAddress)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Order placed successfully 🎉");
+        dispatch(cartActions.replaceCart({
+          cartItems: [],
+          totalQuantity: 0,
+          totalAmount: 0
+        }));
+      } else {
+        toast.error(data.message || "Failed to place order.");
+      }
+    } catch (err) {
+      toast.error("Network Error. Check backend connection.");
+    }
   };
 
   return (
     <Helmet title="Checkout">
       <CommonSection title="Checkout" />
+      <ToastContainer position="top-right" autoClose={2500} />
+      <br />
       <section>
         <Container>
           <Row>

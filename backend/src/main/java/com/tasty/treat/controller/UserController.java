@@ -59,7 +59,7 @@ public class UserController {
 
             return ResponseEntity.ok()
                     .body("{\"message\": \"Login successful\", \"username\": \"" +
-                            user.getUsername() + "\"}");
+                            user.getUsername() + "\", \"userId\": " + user.getUserId() + "}");
 
         } catch (Exception e) {
             return ResponseEntity.status(500)
