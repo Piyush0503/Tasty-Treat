@@ -34,6 +34,8 @@ public class Order {
     private String shippingCity;
     private String shippingPostalCode;
 
+    private String status;
+
     private Double totalAmount;
     private LocalDateTime orderDate;
 
@@ -126,5 +128,13 @@ public class Order {
 
     public void setItems(List<OrderItem> items) {
         this.items = items;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

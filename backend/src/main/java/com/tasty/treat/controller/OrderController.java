@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +53,7 @@ public class OrderController {
             order.setShippingPostalCode(request.getPostalCode());
             order.setTotalAmount(request.getTotalAmount());
             order.setOrderDate(LocalDateTime.now());
+            order.setStatus("Pending");
 
             if (request.getItems() != null) {
                 for (CartItem cartItem : request.getItems()) {
@@ -80,6 +83,48 @@ public class OrderController {
             return ResponseEntity.ok().body("{\"message\": \"Order placed successfully\"}");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("{\"message\": \"Checkout failed: " + e.getMessage() + "\"}");
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllOrders() {
+        try {
+            java.util.List<Order> orders = orderRepo.findAll();
+            return ResponseEntity.ok().body(orders);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("{\"message\": \"Failed to fetch orders: " + e.getMessage() + "\"}");
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserOrders(@PathVariable Long userId) {
+        try {
+            User user = userRepo.findById(userId).orElse(null);
+            if (user == null) {
+                 return ResponseEntity.status(404).body("{\"message\": \"User not found\"}");
+            }
+            java.util.List<Order> orders = orderRepo.findByUser(user);
+            return ResponseEntity.ok().body(orders);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("{\"message\": \"Failed to fetch user orders: " + e.getMessage() + "\"}");
+        }
+    }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Long orderId, @RequestBody java.util.Map<String, String> request) {
+        try {
+            Order order = orderRepo.findById(orderId).orElse(null);
+            if (order == null) {
+                return ResponseEntity.status(404).body("{\"message\": \"Order not found\"}");
+            }
+            if (request.containsKey("status")) {
+                order.setStatus(request.get("status"));
+                orderRepo.save(order);
+                return ResponseEntity.ok().body("{\"message\": \"Order status updated\"}");
+            }
+            return ResponseEntity.status(400).body("{\"message\": \"Status not provided\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("{\"message\": \"Failed to update order status: " + e.getMessage() + "\"}");
         }
     }
 }

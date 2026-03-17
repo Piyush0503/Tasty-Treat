@@ -22,6 +22,8 @@ public class User {
 
     private String password;
 
+    private String role;
+
     private LocalDateTime createdAt;
 
     public Long getUserId() {
@@ -62,6 +64,14 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
 }

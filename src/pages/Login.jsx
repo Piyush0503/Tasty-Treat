@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authStore.js";
 import { cartActions } from "../store/shopping-cart/cartSlice.js";
+import { authFetch } from "../utils/api.js";
 
 const API_URL = "http://localhost:5050/users/login";
 
@@ -60,16 +61,18 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // Save user in Redux store
+        // Save user + JWT token in Redux store (also persists to localStorage)
         dispatch(authActions.setUser({
           username: data.username,
           email: payload.email,
-          userId: data.userId, // Added userId
+          userId: data.userId,
+          role: data.role,
+          token: data.token,
         }));
 
-        // Fetch user's cart from backend
+        // Fetch user's cart from backend (using authenticated fetch)
         try {
-          const cartRes = await fetch(`http://localhost:5050/cart/${data.userId}`);
+          const cartRes = await authFetch(`http://localhost:5050/cart/${data.userId}`);
           if (cartRes.ok) {
             const cartData = await cartRes.json();
             // Transform to Redux format

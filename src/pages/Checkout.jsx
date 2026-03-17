@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { cartActions } from "../store/shopping-cart/cartSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { authFetch } from "../utils/api.js";
 
 import "../styles/checkout.css";
 
@@ -53,11 +54,8 @@ const Checkout = () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:5050/order/${user.userId}/checkout`, {
+      const res = await authFetch(`http://localhost:5050/order/${user.userId}/checkout`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify(userShippingAddress)
       });
 

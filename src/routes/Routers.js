@@ -10,6 +10,9 @@ import Contact from "../pages/Contact";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 
+import AdminDashboard from "../pages/AdminDashboard";
+import UserOrders from "../pages/UserOrders";
+
 const Routers = () => {
   return (
     <Routes>
@@ -22,6 +25,8 @@ const Routers = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/orders" element={<UserOrders />} />
     </Routes>
   );
 };

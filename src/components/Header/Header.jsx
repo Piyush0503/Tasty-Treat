@@ -157,6 +157,49 @@ const Header = () => {
                       </p>
                     </div>
 
+                    {/* Conditional links based on role */}
+                    {user?.role === "ADMIN" ? (
+                      <div
+                        onClick={() => { setDropdownOpen(false); navigate("/admin"); }}
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "14px",
+                          color: "#333",
+                          fontWeight: "500",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          borderBottom: "1px solid #f0f0f0"
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f5f5")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                      >
+                        <i className="ri-dashboard-line"></i>
+                        Dashboard
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => { setDropdownOpen(false); navigate("/orders"); }}
+                        style={{
+                          padding: "12px 16px",
+                          fontSize: "14px",
+                          color: "#333",
+                          fontWeight: "500",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          borderBottom: "1px solid #f0f0f0"
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f5f5")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                      >
+                        <i className="ri-list-check"></i>
+                        My Orders
+                      </div>
+                    )}
+
                     {/* Logout */}
                     <div
                       onClick={handleLogout}

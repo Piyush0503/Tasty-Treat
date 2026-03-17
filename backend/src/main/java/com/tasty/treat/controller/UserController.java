@@ -1,10 +1,13 @@
 package com.tasty.treat.controller;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tasty.treat.model.User;
 import com.tasty.treat.repository.UserRepo;
 import com.tasty.treat.request.LoginRequest;
+import com.tasty.treat.security.JwtService;
 
 @RestController
 @RequestMapping("/users")
@@ -24,12 +28,20 @@ public class UserController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtService jwtService;
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
             if (userRepo.existsByEmail(user.getEmail())) {
                 return ResponseEntity.status(409)
                         .body("{\"message\": \"Email already registered\"}");
+            }
+            if ("admin@admin.com".equalsIgnoreCase(user.getEmail())) {
+                user.setRole("ADMIN");
+            } else {
+                user.setRole("USER");
             }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setCreatedAt(LocalDateTime.now());
@@ -57,13 +69,32 @@ public class UserController {
                         .body("{\"message\": \"Incorrect password\"}");
             }
 
-            return ResponseEntity.ok()
-                    .body("{\"message\": \"Login successful\", \"username\": \"" +
-                            user.getUsername() + "\", \"userId\": " + user.getUserId() + "}");
+            // Generate JWT token
+            String token = jwtService.generateToken(user.getUserId(), user.getEmail(), user.getRole());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login successful");
+            response.put("username", user.getUsername());
+            response.put("userId", user.getUserId());
+            response.put("role", user.getRole());
+            response.put("token", token);
+
+            return ResponseEntity.ok().body(response);
 
         } catch (Exception e) {
             return ResponseEntity.status(500)
                     .body("{\"message\": \"Login failed: " + e.getMessage() + "\"}");
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            java.util.List<User> users = userRepo.findAll();
+            return ResponseEntity.ok().body(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body("{\"message\": \"Failed to fetch users: " + e.getMessage() + "\"}");
         }
     }
 
